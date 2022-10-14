@@ -546,6 +546,11 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
 
   double t_d;
 
+  fprintf(
+          stdout,
+          "Hello!!!!!!!!!!!!!!!!!!\n");
+
+
   /* Extract polyhedral representation from input program */
   if (options->pet) {
     // Extract using PET.
@@ -594,7 +599,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
       }
 
       clan_options_p clanOptions = clan_options_malloc();
-
+      // Here: 在这里，计算了openscop，可能直接输入scop，也可能通过clan extract获得
       if (options->readscop) {
         osl_interface_p registry = osl_interface_get_default_registry();
         double t_start = rtclock();
@@ -614,6 +619,15 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
         pluto_options_free(options);
         return 8;
       }
+
+      {
+        // FIXME: dump openscop before scheduling
+        FILE *src_fp;
+        src_fp = fopen(".beforescheduling", "w");
+        osl_scop_print(src_fp, scop);  // 这个可以输出openscop格式
+        fclose(src_fp);
+      }
+
       FILE *srcfp = fopen(".srcfilename", "w");
       if (srcfp) {
         fprintf(srcfp, "%s\n", srcFileName);
@@ -632,7 +646,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
         (osl_irregular_p)osl_generic_lookup(scop->extension, OSL_URI_IRREGULAR);
     if (irreg_ext != NULL)
       // TODO: test it
-      irroption = osl_irregular_sprint(irreg_ext);
+    irroption = osl_irregular_sprint(irreg_ext);
     osl_irregular_free(irreg_ext);
   }
   IF_MORE_DEBUG(pluto_prog_print(stdout, prog));
@@ -706,8 +720,20 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
   if (!options->pet && !strcmp(srcFileName, "stdin")) {
     // input stdin == output stdout
     pluto_populate_scop(scop, prog, context);
+    fprintf(stdout, "[pluto] Generated OpenScop output:\n");
+    // Check here: coverted to OpenScop
     osl_scop_print(stdout, scop);
   } else {
+    {
+      // FIXME: scheduled openscop
+      pluto_populate_scop(scop, prog, context);
+      fprintf(stdout, "[pluto] Generated OpenScop output:\n");
+      // Check here: coverted to OpenScop
+      FILE *src_fp;
+      src_fp = fopen(".afterscheduling", "w");
+      osl_scop_print(src_fp, scop);  // 这个可以输出openscop格式
+      fclose(src_fp);
+    }
     // Do the usual Pluto stuff.
 
     /* NO MORE TRANSFORMATIONS BEYOND THIS POINT */
