@@ -1,0 +1,20 @@
+
+#pragma scop
+    for (t = 0; t < T; t++) {
+        X[t][t+1] = 2;
+        X[t][t-1] = 1;
+    }
+#pragma endscop
+
+    IF_TIME(t_end = rtclock());
+    IF_TIME(fprintf(stderr, "%0.6lfs\n", t_end - t_start));
+
+#ifdef PERFCTR
+    PERF_EXIT; 
+#endif
+
+    if (fopen(".test", "r")) {
+        print_array();
+    }
+    return 0;
+}
