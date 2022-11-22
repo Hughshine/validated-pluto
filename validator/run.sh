@@ -1,0 +1,1 @@
+../polycc test.c --moredebug --nofuse --notile --noprevector --nodiamond-tile --nounrolljam --noparallel -o test.pluto.c
