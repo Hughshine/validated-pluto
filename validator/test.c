@@ -16,9 +16,13 @@
 
 int main()
 {
-    int i, j, k, l, m, n, t;
+    int i, j, k, l, m, n, t, k;
 
     int i1, i2;
+
+    int X[10];
+
+    int T = 10;
 
     double t_start, t_end;
 
@@ -33,14 +37,9 @@ int main()
 #pragma scop
     for (t = 0; t < T; t++) {
         X[t][t-1] = 1;
-        X[t][t+1] = 1;
-    }
-#pragma endscop
-
-#pragma scop
-    for (t = 0; t < T; t++) {
-        X[t][t+1] = 2;
-        X[t][t-1] = 1;
+        for (k = 0; k < t; k++) {
+            X[t][t+1] = 1;
+        }
     }
 #pragma endscop
 
