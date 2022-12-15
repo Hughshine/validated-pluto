@@ -48,6 +48,7 @@ if ! grep -q "#define ceild(n,d)" __tmp
 fi
 
 # Run the preprocessor
+# 看起来主要是在rewrite #define
 $CC -E -P .body.c | grep -v "^# " | sed -e 's/__bee_schedule/#pragma schedule/' |  \
 sed -e 's/_NL_DELIMIT_/\n/' >> __tmp
 
