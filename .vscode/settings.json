@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "vector": "c",
+        "functional": "cpp",
+        "dependence.h": "c",
+        "constraint.h": "c",
+        "papi_defs.h": "c"
+    }
+}

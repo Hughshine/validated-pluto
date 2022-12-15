@@ -398,6 +398,7 @@ __isl_give isl_union_map *pluto_transform(__isl_take isl_union_set *domains,
   PlutoProg *prog = pluto_prog_from_isl_domains_dependences(
       domains, dependences, reads, writes, context);
 
+  // Check here
   IF_MORE_DEBUG(printf("Extracted PlutoProg\n"));
   IF_MORE_DEBUG(pluto_prog_print(stdout, prog));
 
