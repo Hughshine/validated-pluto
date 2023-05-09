@@ -1,5 +1,7 @@
 # Project Structure
 
+> 注意，需要安装 libclang-X.X-dev, texinfo for candl; remove texi dependences
+
 pluto工作方式：一次优化一个scop，截取，运算，output；多次截取操作由polycc.sh完成，单次优化逻辑由pluto/main完成；pluto优化时不关心类型信息，用户负责。
 
 <!-- autoconf: 
