@@ -2,6 +2,19 @@ from enum import Enum
 import os
 import subprocess
 import scophelper 
+import argparse
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument("--scheduling", action="store_true", help="Enable scheduling")
+parser.add_argument("--tiling", action="store_true", help="Enable tiling")
+parser.add_argument("--both", action="store_true", help="Enable both scheduling and tiling")
+
+args = parser.parse_args()
+
+scheduling = args.scheduling
+tiling = args.tiling
+both = args.both
 
 '''
 Evaluation: 
@@ -33,13 +46,14 @@ Questions:
 
 default_tests = [
     ('examples/matmul', 'matmul.c'),
+    ('examples/adi', 'adi.c'),
 ]
 
 absroot = os.path.abspath('.')
 
 
 pluto_base = [
-    absroot + 'tool/pluto',
+    absroot + '/polycc.sh',
     '--nointratileopt',     # ?
     '--nodiamond-tile',     
     '--noprevector',
@@ -54,9 +68,10 @@ pluto_base = [
 pluto_sched = pluto_base + ['--notile']
 pluto_sched_and_tiles = pluto_base + ['--tile'] 
 
+
 validator_base = [
     'sh',
-    'validator/validator.sh',
+    absroot + '/validator/validator.sh',
 ]
 
 # validator + tiling
@@ -84,18 +99,19 @@ def run_pluto_fragment(filebase, ty):
     pass
 
 def run_pluto(filebase, ty):
-    if not ty is TestTy.SCHED_AND_TILE:
-        return
-    scops = scophelper.get(filebase+'.c')
-    for scop in scops: 
-        print(''.join(scop))
-    # scop_count = scophelper.count(filebase+'.c')
-    # for i in range(1, scop_count+1):
-    #     scop = 
-    #     pass 
-
-
-
+    if ty is TestTy.SCHED_ONLY:
+        command = pluto_sched \
+            + [filebase + '.c'] \
+            + ['-o', filebase + '.' + ty.value + '.c']
+        result = subprocess.run(command, capture_output=True, text=True)
+        print(result)
+    if ty is TestTy.SCHED_AND_TILE: 
+        command = pluto_sched_and_tiles \
+            + [filebase + '.c'] \
+            + ['-o', filebase + '.' + ty.value + '.c']
+        result = subprocess.run(command, capture_output=True, text=True)
+        print(result)
+    
     # if ty is TestTy.NONE: 
     #     return
     # elif ty is TestTy.SCHED_ONLY: 
@@ -128,18 +144,23 @@ def collect_statistics():
     pass
 
 def run(dic, file):
+    print(args)
     work_dic = os.getcwd()
     os.chdir(dic)
     filebase = os.path.splitext(file)[0]
-    try: 
-        # command = base_command + [target_test_dic]
-        for ty in TestTy: 
-            run_pluto(filebase, ty)
-            run_validation(filebase, ty)    # supposing single scop per file
-            run_clang(filebase, ty)            
-            run_generated(filebase, ty)
-            # command = clang_command + ['-DTIME', 'matmul.c', '-o', 'orig', '-lm']
-            # result = subprocess.run(command, capture_output=True, text=True)
+    # command = base_command + [target_test_dic]
+    if scheduling and not tiling:
+        run_pluto(filebase, TestTy.SCHED_ONLY)
+    elif tiling and not scheduling:
+        run_pluto(filebase, TestTy.TILE_ONLY)
+    elif both or (scheduling and tiling):
+        run_pluto(filebase, TestTy.SCHED_AND_TILE)
+
+    # run_validation(filebase, ty)    # supposing single scop per file
+    # run_clang(filebase, ty)            
+    # run_generated(filebase, ty)
+        # command = clang_command + ['-DTIME', 'matmul.c', '-o', 'orig', '-lm']
+        # result = subprocess.run(command, capture_output=True, text=True)
     # except err: 
     #     print(err)
     # Check the command execution status
@@ -147,21 +168,20 @@ def run(dic, file):
         #     print(result)
         # else:
         #     print("failed")
-    finally:
-        os.chdir(work_dic)
+    os.chdir(work_dic)
 
-def clean(dic, file):
-    os.chdir(dic)
-    try: 
-        for ty in TestTy:
-            pass 
-    except err: 
-        print(err)
+# def clean(dic, file):
+#     os.chdir(dic)
+#     try: 
+#         for ty in TestTy:
+#             pass 
+#     except err: 
+#         print(err)
 
-def cleanall():
-    for (dic, file) in default_tests:
-        clean(dic, file)
-    pass
+# def cleanall():
+#     for (dic, file) in default_tests:
+#         clean(dic, file)
+    # pass
 
 def runall(): 
     for (dic, file) in default_tests:
@@ -169,6 +189,6 @@ def runall():
     collect_statistics()
 
 runall()
-cleanall()
+# cleanall()
 # support single scop
 # support single project with multiple scop in it (main.c)

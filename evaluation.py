@@ -120,6 +120,7 @@ def parse_performance_data(data_string):
     performance_data = PerformanceData(success, total_time, extractor_time, scheduler_time, validator_time, codegen_time)
     return performance_data
 
+
 def run(dic, file):
     print_delimiter_line()
     print_header(f"Testing on {dic}/{file}")
@@ -177,7 +178,7 @@ def run(dic, file):
     time_exec_opt = toc()
     print_info(f"Execution time[{dic}/{opt_file}][Opt]: {time_exec_opt:.2f} seconds")
     assert (result_exec_orig.returncode == 0 and result_exec_opt.returncode == 0)
-
+    # 4. may compare the result later. uniformly written into stdout
     os.chdir(orig_dic)
 
 def runall():
